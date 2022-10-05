@@ -1,0 +1,23 @@
+spring:
+  application:
+    name: Project Roadmap
+  jpa:
+    open-in-view: false
+  thymeleaf:
+    cache: false
+    enabled: true
+    check-template: true
+    check-template-location: true
+    prefix: classpath:/templates/
+    suffix: .html
+    mode: HTML
+    encoding: UTF-8
+    servlet:
+      content-type: text/html
+
+server:
+  port: 8081
+
+logging:
+  level:
+    root: info
