@@ -1,17 +1,29 @@
 <!DOCTYPE html>
 <html lang="en">
-    <head>
-        <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        <title th:text="${appName} + ' - Home'">Title</title>
-    </head>
-    <body>
-        <h1>Hello !</h1>
-        <p>Welcome to <span th:text="${appName}">App Name</span></p>
-        <div  class="container">
-            <dl th:each="milestone : ${milestones}">
-                <dt th:text="${milestone}"></dt>
-            </dl>
-        </div>
-    </body>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title th:text="${appName} + ' - Home'">Title</title>
+</head>
+<body>
+<h1>Hello !</h1>
+<p>Welcome to <span th:text="${appName}">App Name</span></p>
+<div class="container">
+
+    <div th:each="milestone : ${milestones}">
+        <li th:text="${milestone.getMilestoneTitle()}"></li>
+        <ul>
+            <div th:each="requirement : ${milestone.getRequirementList()}">
+                <li th:text="${requirement.getRequirementTitle()}"></li>
+                <ul>
+                    <div th:each="task : ${requirement.getTaskList()}">
+                        <li th:text="${task.getTaskTitle()}"></li>
+                    </div>
+                </ul>
+            </div>
+        </ul>
+    </div>
+
+</div>
+</body>
 </html>
