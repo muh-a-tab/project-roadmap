@@ -19,7 +19,7 @@ public class RoadmapController {
 
     @GetMapping("/")
     public String homePage(Model model) {
-        model.addAttribute("milestones", gitLabApiService.getMilestoneTitles());
+        model.addAttribute("milestones", gitLabApiService.getProjectRoadmapStatus());
         model.addAttribute("appName", appName);
         return "roadmap";
     }
