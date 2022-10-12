@@ -23,11 +23,11 @@ public class GitLabApiService implements IGitLabApiService {
     public GitLabApiService(GitLabApi gitLabApi) {
         this.gitLabApi = gitLabApi;
         //ProjectId ataması
-        this.projectId = String.valueOf(39963710L);
+        this.projectId = String.valueOf(34L);
     }
 
     @Override
-    public List<Milestone> getMilestoneTitles() {
+    public List<Milestone> getProjectRoadmapStatus() {
         List<Milestone> milestoneList = new ArrayList<>();
 
         try {
