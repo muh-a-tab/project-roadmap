@@ -4,10 +4,13 @@ import com.project.roadmap.entity.Milestone;
 import com.project.roadmap.entity.Requirement;
 import com.project.roadmap.entity.Task;
 import com.project.roadmap.service.IGitLabApiService;
+import org.gitlab4j.api.Constants;
 import org.gitlab4j.api.GitLabApi;
 import org.gitlab4j.api.GitLabApiException;
+import org.gitlab4j.api.models.Issue;
 import org.gitlab4j.api.models.IssueFilter;
 import org.springframework.stereotype.Service;
+import com.project.roadmap.Constants.TaskState;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -80,13 +83,12 @@ public class GitLabApiService implements IGitLabApiService {
         List<Task> taskList = new ArrayList<>();
 
         try {
-            //  Requirement Id ile linklenmiş task'lar bulundu ve task title'ları bir diziye ekledik
-            List<String> tasks = gitLabApi.getIssuesApi().getIssueLinks(projectId, requirementId)
-                    .stream().map(t -> t.getTitle()).collect(Collectors.toList());
+            //  Requirement Id ile linklenmiş task'lar bulundu ve diziye ekledik
+            List<Issue> tasks = gitLabApi.getIssuesApi().getIssueLinks(projectId, requirementId);
 
-            // Task title'larını kullanılarak nesne oluşturuldu ve listemize ekledik
-            for (String task : tasks) {
-                taskList.add(new Task(task));
+            // Task dizisi kullanılarak Task nesneleri oluşturuldu ve listemize ekledik
+            for (Issue task : tasks) {
+                taskList.add(new Task(task.getTitle(), task.getState().equals(Constants.IssueState.CLOSED) ? TaskState.CLOSED : TaskState.OPENED));
             }
 
             return taskList;
