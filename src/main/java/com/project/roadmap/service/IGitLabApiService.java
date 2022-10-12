@@ -1,13 +1,15 @@
 package com.project.roadmap.service;
 
-import org.gitlab4j.api.GitLabApiException;
+import com.project.roadmap.entity.Milestone;
+import com.project.roadmap.entity.Requirement;
+import com.project.roadmap.entity.Task;
 
 import java.util.List;
 
 public interface IGitLabApiService {
+    List<Milestone> getProjectRoadmapStatus();
 
-    public List<String> getMilestoneTitles();
+    List<Requirement> getRequirementIssues(String milestoneTitle);
 
-    public List<String> getRequirementIssues ();
-
+    List<Task> getTaskIssues(Long requirementId);
 }
