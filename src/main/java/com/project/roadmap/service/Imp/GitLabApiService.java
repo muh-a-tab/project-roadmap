@@ -1,5 +1,6 @@
 package com.project.roadmap.service.Imp;
 
+import com.project.roadmap.entity.FactoryEntity;
 import com.project.roadmap.entity.Milestone;
 import com.project.roadmap.entity.Requirement;
 import com.project.roadmap.entity.Task;
@@ -68,13 +69,14 @@ public class GitLabApiService implements IGitLabApiService {
             // Requirement Issue listesi ile Requirement Title'ları ve Linklenmiş Issue'ları çağırarak
             // bir Requirement nesnesi oluşturuldu ve Requirement Listesine eklendi
             for (Issue requirement : requirementsIssueList) {
-                requirementList.add(new Requirement(requirement.getTitle(),
-                        getTaskIssues(requirement.getIid()), requirementStateCheck(requirement)));
+
+                requirementList.add(FactoryEntity
+                        .getRequirementInstance(requirement.getTitle(), getTaskIssues(requirement.getIid()), requirement.getState()));
             }
 
             return requirementList;
-        } catch (GitLabApiException ignored) {
-
+        } catch (GitLabApiException e) {
+            logger.warn("GitLabApiService.java -> getRequirementIssues() : " + e.getMessage());
         }
         return Collections.emptyList();
     }
@@ -88,33 +90,14 @@ public class GitLabApiService implements IGitLabApiService {
 
             // Task dizisi kullanılarak Task nesneleri oluşturuldu ve listemize ekledik
             for (Issue task : tasks) {
-                taskList.add(new Task(task.getTitle(), task.getState() == Constants.IssueState.CLOSED ? TaskState.CLOSED : TaskState.OPENED));
+                taskList.add(FactoryEntity.getTaskInstance(task.getTitle(), task.getState()));
             }
 
             return taskList;
-        } catch (GitLabApiException ignored) {
-
+        } catch (GitLabApiException e) {
+            logger.warn("GitLabApiService.java -> getTaskIssues() : " + e.getMessage());
         }
 
         return Collections.emptyList();
     }
-
-    private RequirementState requirementStateCheck(Issue requirement) {
-
-        // Requirement CLOSED durumundaysa
-        if (requirement.getState() == Constants.IssueState.CLOSED) {
-
-            //Requirement altındaki Task'ların durumlarını kontrol ediyoruz
-            for (Task task : getTaskIssues(requirement.getIid())) {
-                // Task OPENED durumundaysa geriye NOT_CLOSED_YET durumunu dönüyoruz
-                if (task.getTaskState() == TaskState.OPENED)
-                    return RequirementState.NOT_CLOSED_YET;
-            }
-            // Bütün tasklar CLOSED durumundaysa
-            return RequirementState.CLOSED;
-        } else
-            // Requirement OPENED durumundaysa
-            return RequirementState.OPENED;
-    }
-
 }
