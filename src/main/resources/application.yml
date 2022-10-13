@@ -20,7 +20,7 @@ server:
   
 gitlab:
     api:
-      hostUrl: https://gitlab.com
+      hostUrl:
       privateToken: 
 
 logging:

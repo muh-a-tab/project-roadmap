@@ -9,7 +9,4 @@ import java.util.List;
 public interface IGitLabApiService {
     List<Milestone> getProjectRoadmapStatus();
 
-    List<Requirement> getRequirementIssues(String milestoneTitle);
-
-    List<Task> getTaskIssues(Long requirementId);
 }
