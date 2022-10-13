@@ -20,8 +20,8 @@ server:
   
 gitlab:
     api:
-      hostUrl: https://gitlab.com
-      privateToken: 
+      hostUrl: http://192.168.1.178
+      privateToken: Yvg1eSzuv3x-AcvFk43V
 
 logging:
   level:

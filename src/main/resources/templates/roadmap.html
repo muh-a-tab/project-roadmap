@@ -14,16 +14,7 @@
         <li th:text="${milestone.getMilestoneTitle()}"></li>
         <ul>
             <div th:each="requirement : ${milestone.getRequirementList()}">
-
-                <div th:switch="${requirement.getRequirementState.name()}">
-                    <li th:case="${'OPENED'}" th:text="${requirement.getRequirementTitle()}"></li>
-                    <li th:case="${'CLOSED'}">
-                        <del th:text="${requirement.getRequirementTitle()}"></del>
-                    </li>
-                    <li th:case="${'NOT_CLOSED_YET'}">
-                        <del th:text="${requirement.getRequirementTitle()}" style="color: red"></del>
-                    </li>
-                </div>
+                <li th:text="${requirement.getRequirementTitle()}"></li>
                 <ul>
                     <div th:each="task : ${requirement.getTaskList()}">
                         <div th:switch="${task.getTaskState().name()}">

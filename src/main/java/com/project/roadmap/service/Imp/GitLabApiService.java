@@ -9,9 +9,10 @@ import org.gitlab4j.api.GitLabApi;
 import org.gitlab4j.api.GitLabApiException;
 import org.gitlab4j.api.models.Issue;
 import org.gitlab4j.api.models.IssueFilter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import com.project.roadmap.entity.Constants.TaskState;
-import com.project.roadmap.entity.Constants.RequirementState;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -21,6 +22,7 @@ import java.util.stream.Collectors;
 @Service
 public class GitLabApiService implements IGitLabApiService {
 
+    private Logger logger = LoggerFactory.getLogger(GitLabApiService.class);
     final GitLabApi gitLabApi;
     private final String projectId;
 
@@ -46,29 +48,28 @@ public class GitLabApiService implements IGitLabApiService {
             }
 
             return milestoneList;
-        } catch (GitLabApiException ignored) {
-
+        } catch (GitLabApiException e) {
+            logger.warn("GitLabApiService.java -> getProjectRoadmapStatus() : " + e.getMessage());
         }
         return Collections.emptyList();
     }
 
-
-    @Override
-    public List<Requirement> getRequirementIssues(String milestoneTitle) {
+    private List<Requirement> getRequirementIssues(String milestoneTitle) {
 
         List<Requirement> requirementList = new ArrayList<>();
 
         try {
-            //Parametre olarak gelen milestone başlığına ait Requirement Issue Listesini tutuyoruz
-            List<Issue> requirementsIssueList = gitLabApi.getIssuesApi().
+            //Parametre olarak gelen milestone başlığına ait Requirement Issue Id'lerini bir diziye aktardık
+            List<Long> requirementsId = gitLabApi.getIssuesApi().
                     getIssues(projectId, new IssueFilter().withMilestone(milestoneTitle)
-                            .withLabels(List.of("requirement")));
+                            .withLabels(List.of("requirement")))
+                    .stream().map(i -> i.getIid()).collect(Collectors.toList());
 
-            // Requirement Issue listesi ile Requirement Title'ları ve Linklenmiş Issue'ları çağırarak
+            // Id'ler kullanılarak Requirement Title'ları ve Linklenmiş Issue'ları çağırarak
             // bir Requirement nesnesi oluşturuldu ve Requirement Listesine eklendi
-            for (Issue requirement : requirementsIssueList) {
-                requirementList.add(new Requirement(requirement.getTitle(),
-                        getTaskIssues(requirement.getIid()), requirementStateCheck(requirement)));
+            for (long requirement : requirementsId) {
+                requirementList.add(new Requirement(gitLabApi.getIssuesApi().getIssue(projectId, requirement).getTitle(),
+                        getTaskIssues(requirement)));
             }
 
             return requirementList;
@@ -78,8 +79,7 @@ public class GitLabApiService implements IGitLabApiService {
         return Collections.emptyList();
     }
 
-    @Override
-    public List<Task> getTaskIssues(Long requirementId) {
+    private List<Task> getTaskIssues(Long requirementId) {
         List<Task> taskList = new ArrayList<>();
 
         try {
@@ -98,23 +98,4 @@ public class GitLabApiService implements IGitLabApiService {
 
         return Collections.emptyList();
     }
-
-    private RequirementState requirementStateCheck(Issue requirement) {
-
-        // Requirement CLOSED durumundaysa
-        if (requirement.getState() == Constants.IssueState.CLOSED) {
-
-            //Requirement altındaki Task'ların durumlarını kontrol ediyoruz
-            for (Task task : getTaskIssues(requirement.getIid())) {
-                // Task OPENED durumundaysa geriye NOT_CLOSED_YET durumunu dönüyoruz
-                if (task.getTaskState() == TaskState.OPENED)
-                    return RequirementState.NOT_CLOSED_YET;
-            }
-            // Bütün tasklar CLOSED durumundaysa
-            return RequirementState.CLOSED;
-        } else
-            // Requirement OPENED durumundaysa
-            return RequirementState.OPENED;
-    }
-
 }
