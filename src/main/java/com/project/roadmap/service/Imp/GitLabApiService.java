@@ -52,7 +52,9 @@ public class GitLabApiService implements IGitLabApiService {
         return Collections.emptyList();
     }
 
-    private List<Requirement> getRequirementIssues(String milestoneTitle) {
+
+    @Override
+    public List<Requirement> getRequirementIssues(String milestoneTitle) {
 
         List<Requirement> requirementList = new ArrayList<>();
 
@@ -76,7 +78,8 @@ public class GitLabApiService implements IGitLabApiService {
         return Collections.emptyList();
     }
 
-    private List<Task> getTaskIssues(Long requirementId) {
+    @Override
+    public List<Task> getTaskIssues(Long requirementId) {
         List<Task> taskList = new ArrayList<>();
 
         try {
