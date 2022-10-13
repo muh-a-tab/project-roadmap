@@ -1,5 +1,6 @@
 package com.project.roadmap.service.Imp;
 
+import com.project.roadmap.entity.FactoryEntity;
 import com.project.roadmap.entity.Milestone;
 import com.project.roadmap.entity.Requirement;
 import com.project.roadmap.entity.Task;
@@ -13,6 +14,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import com.project.roadmap.entity.Constants.TaskState;
+import com.project.roadmap.entity.Constants.RequirementState;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -59,22 +61,22 @@ public class GitLabApiService implements IGitLabApiService {
         List<Requirement> requirementList = new ArrayList<>();
 
         try {
-            //Parametre olarak gelen milestone başlığına ait Requirement Issue Id'lerini bir diziye aktardık
-            List<Long> requirementsId = gitLabApi.getIssuesApi().
+            //Parametre olarak gelen milestone başlığına ait Requirement Issue Listesini tutuyoruz
+            List<Issue> requirementsIssueList = gitLabApi.getIssuesApi().
                     getIssues(projectId, new IssueFilter().withMilestone(milestoneTitle)
-                            .withLabels(List.of("requirement")))
-                    .stream().map(i -> i.getIid()).collect(Collectors.toList());
+                            .withLabels(List.of("requirement")));
 
-            // Id'ler kullanılarak Requirement Title'ları ve Linklenmiş Issue'ları çağırarak
+            // Requirement Issue listesi ile Requirement Title'ları ve Linklenmiş Issue'ları çağırarak
             // bir Requirement nesnesi oluşturuldu ve Requirement Listesine eklendi
-            for (long requirement : requirementsId) {
-                requirementList.add(new Requirement(gitLabApi.getIssuesApi().getIssue(projectId, requirement).getTitle(),
-                        getTaskIssues(requirement)));
+            for (Issue requirement : requirementsIssueList) {
+
+                requirementList.add(FactoryEntity
+                        .getRequirementInstance(requirement.getTitle(), getTaskIssues(requirement.getIid()), requirement.getState()));
             }
 
             return requirementList;
-        } catch (GitLabApiException ignored) {
-
+        } catch (GitLabApiException e) {
+            logger.warn("GitLabApiService.java -> getRequirementIssues() : " + e.getMessage());
         }
         return Collections.emptyList();
     }
@@ -88,12 +90,12 @@ public class GitLabApiService implements IGitLabApiService {
 
             // Task dizisi kullanılarak Task nesneleri oluşturuldu ve listemize ekledik
             for (Issue task : tasks) {
-                taskList.add(new Task(task.getTitle(), task.getState() == Constants.IssueState.CLOSED ? TaskState.CLOSED : TaskState.OPENED));
+                taskList.add(FactoryEntity.getTaskInstance(task.getTitle(), task.getState()));
             }
 
             return taskList;
-        } catch (GitLabApiException ignored) {
-
+        } catch (GitLabApiException e) {
+            logger.warn("GitLabApiService.java -> getTaskIssues() : " + e.getMessage());
         }
 
         return Collections.emptyList();
