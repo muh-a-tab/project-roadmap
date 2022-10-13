@@ -1,6 +1,6 @@
 package com.project.roadmap.entity;
 
-import com.project.roadmap.Constants.TaskState;
+import com.project.roadmap.entity.Constants.TaskState;
 
 public class Task {
 

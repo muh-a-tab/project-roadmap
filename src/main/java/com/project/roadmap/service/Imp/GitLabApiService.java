@@ -10,7 +10,7 @@ import org.gitlab4j.api.GitLabApiException;
 import org.gitlab4j.api.models.Issue;
 import org.gitlab4j.api.models.IssueFilter;
 import org.springframework.stereotype.Service;
-import com.project.roadmap.Constants.TaskState;
+import com.project.roadmap.entity.Constants.TaskState;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -88,7 +88,7 @@ public class GitLabApiService implements IGitLabApiService {
 
             // Task dizisi kullanılarak Task nesneleri oluşturuldu ve listemize ekledik
             for (Issue task : tasks) {
-                taskList.add(new Task(task.getTitle(), task.getState().equals(Constants.IssueState.CLOSED) ? TaskState.CLOSED : TaskState.OPENED));
+                taskList.add(new Task(task.getTitle(), task.getState() == Constants.IssueState.CLOSED ? TaskState.CLOSED : TaskState.OPENED));
             }
 
             return taskList;
