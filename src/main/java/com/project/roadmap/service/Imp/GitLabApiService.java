@@ -13,6 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import com.project.roadmap.entity.Constants.TaskState;
+import com.project.roadmap.entity.Constants.RequirementState;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -59,17 +60,16 @@ public class GitLabApiService implements IGitLabApiService {
         List<Requirement> requirementList = new ArrayList<>();
 
         try {
-            //Parametre olarak gelen milestone başlığına ait Requirement Issue Id'lerini bir diziye aktardık
-            List<Long> requirementsId = gitLabApi.getIssuesApi().
+            //Parametre olarak gelen milestone başlığına ait Requirement Issue Listesini tutuyoruz
+            List<Issue> requirementsIssueList = gitLabApi.getIssuesApi().
                     getIssues(projectId, new IssueFilter().withMilestone(milestoneTitle)
-                            .withLabels(List.of("requirement")))
-                    .stream().map(i -> i.getIid()).collect(Collectors.toList());
+                            .withLabels(List.of("requirement")));
 
-            // Id'ler kullanılarak Requirement Title'ları ve Linklenmiş Issue'ları çağırarak
+            // Requirement Issue listesi ile Requirement Title'ları ve Linklenmiş Issue'ları çağırarak
             // bir Requirement nesnesi oluşturuldu ve Requirement Listesine eklendi
-            for (long requirement : requirementsId) {
-                requirementList.add(new Requirement(gitLabApi.getIssuesApi().getIssue(projectId, requirement).getTitle(),
-                        getTaskIssues(requirement)));
+            for (Issue requirement : requirementsIssueList) {
+                requirementList.add(new Requirement(requirement.getTitle(),
+                        getTaskIssues(requirement.getIid()), requirementStateCheck(requirement)));
             }
 
             return requirementList;
@@ -98,4 +98,23 @@ public class GitLabApiService implements IGitLabApiService {
 
         return Collections.emptyList();
     }
+
+    private RequirementState requirementStateCheck(Issue requirement) {
+
+        // Requirement CLOSED durumundaysa
+        if (requirement.getState() == Constants.IssueState.CLOSED) {
+
+            //Requirement altındaki Task'ların durumlarını kontrol ediyoruz
+            for (Task task : getTaskIssues(requirement.getIid())) {
+                // Task OPENED durumundaysa geriye NOT_CLOSED_YET durumunu dönüyoruz
+                if (task.getTaskState() == TaskState.OPENED)
+                    return RequirementState.NOT_CLOSED_YET;
+            }
+            // Bütün tasklar CLOSED durumundaysa
+            return RequirementState.CLOSED;
+        } else
+            // Requirement OPENED durumundaysa
+            return RequirementState.OPENED;
+    }
+
 }
