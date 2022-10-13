@@ -6,4 +6,10 @@ public interface Constants {
         OPENED, CLOSED;
     }
 
+    public enum RequirementState {
+
+        OPENED, CLOSED, NOT_CLOSED_YET;
+
+    }
+
 }
