@@ -17,7 +17,12 @@
                 <li th:text="${requirement.getRequirementTitle()}"></li>
                 <ul>
                     <div th:each="task : ${requirement.getTaskList()}">
-                        <li th:text="${task.getTaskTitle()}"></li>
+                        <div th:switch="${task.getTaskState().name()}">
+                            <li th:case="${'CLOSED'}">
+                                <del th:text="${task.getTaskTitle()}"></del>
+                            </li>
+                            <li th:case="${'OPENED'}" th:text="${task.getTaskTitle()}"></li>
+                        </div>
                     </div>
                 </ul>
             </div>

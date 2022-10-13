@@ -4,10 +4,15 @@ import com.project.roadmap.entity.Milestone;
 import com.project.roadmap.entity.Requirement;
 import com.project.roadmap.entity.Task;
 import com.project.roadmap.service.IGitLabApiService;
+import org.gitlab4j.api.Constants;
 import org.gitlab4j.api.GitLabApi;
 import org.gitlab4j.api.GitLabApiException;
+import org.gitlab4j.api.models.Issue;
 import org.gitlab4j.api.models.IssueFilter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import com.project.roadmap.entity.Constants.TaskState;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -17,6 +22,7 @@ import java.util.stream.Collectors;
 @Service
 public class GitLabApiService implements IGitLabApiService {
 
+    private Logger logger = LoggerFactory.getLogger(GitLabApiService.class);
     final GitLabApi gitLabApi;
     private final String projectId;
 
@@ -42,15 +48,13 @@ public class GitLabApiService implements IGitLabApiService {
             }
 
             return milestoneList;
-        } catch (GitLabApiException ignored) {
-
+        } catch (GitLabApiException e) {
+            logger.warn("GitLabApiService.java -> getProjectRoadmapStatus() : " + e.getMessage());
         }
         return Collections.emptyList();
     }
 
-
-    @Override
-    public List<Requirement> getRequirementIssues(String milestoneTitle) {
+    private List<Requirement> getRequirementIssues(String milestoneTitle) {
 
         List<Requirement> requirementList = new ArrayList<>();
 
@@ -75,18 +79,16 @@ public class GitLabApiService implements IGitLabApiService {
         return Collections.emptyList();
     }
 
-    @Override
-    public List<Task> getTaskIssues(Long requirementId) {
+    private List<Task> getTaskIssues(Long requirementId) {
         List<Task> taskList = new ArrayList<>();
 
         try {
-            //  Requirement Id ile linklenmiş task'lar bulundu ve task title'ları bir diziye ekledik
-            List<String> tasks = gitLabApi.getIssuesApi().getIssueLinks(projectId, requirementId)
-                    .stream().map(t -> t.getTitle()).collect(Collectors.toList());
+            //  Requirement Id ile linklenmiş task'lar bulundu ve diziye ekledik
+            List<Issue> tasks = gitLabApi.getIssuesApi().getIssueLinks(projectId, requirementId);
 
-            // Task title'larını kullanılarak nesne oluşturuldu ve listemize ekledik
-            for (String task : tasks) {
-                taskList.add(new Task(task));
+            // Task dizisi kullanılarak Task nesneleri oluşturuldu ve listemize ekledik
+            for (Issue task : tasks) {
+                taskList.add(new Task(task.getTitle(), task.getState() == Constants.IssueState.CLOSED ? TaskState.CLOSED : TaskState.OPENED));
             }
 
             return taskList;
