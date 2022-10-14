@@ -11,7 +11,15 @@
 <div class="container">
 
     <div th:each="milestone : ${milestones}">
-        <li th:text="${milestone.getMilestoneTitle()}"></li>
+        <div th:switch="${milestone.getMilestoneState.name()}">
+            <li th:case="${'OPENED'}" th:text="${milestone.getMilestoneTitle()}"></li>
+            <li th:case="${'CLOSED'}">
+                <del th:text="${milestone.getMilestoneTitle()}"></del>
+            </li>
+            <li th:case="${'NOT_CLOSED_YET'}">
+                <del th:text="${milestone.getMilestoneTitle()}" style="color: red"></del>
+            </li>
+        </div>
         <ul>
             <div th:each="requirement : ${milestone.getRequirementList()}">
 
@@ -23,6 +31,7 @@
                     <li th:case="${'NOT_CLOSED_YET'}">
                         <del th:text="${requirement.getRequirementTitle()}" style="color: red"></del>
                     </li>
+
                 </div>
                 <ul>
                     <div th:each="task : ${requirement.getTaskList()}">
