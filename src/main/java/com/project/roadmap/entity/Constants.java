@@ -2,14 +2,16 @@ package com.project.roadmap.entity;
 
 public interface Constants {
 
-    public enum TaskState {
-        OPENED, CLOSED;
+    enum TaskState {
+        OPENED, CLOSED
     }
 
-    public enum RequirementState {
+    enum RequirementState {
+        OPENED, CLOSED, NOT_CLOSED_YET
+    }
 
-        OPENED, CLOSED, NOT_CLOSED_YET;
-
+    enum MilestoneState {
+        OPENED, CLOSED, NOT_CLOSED_YET
     }
 
 }
