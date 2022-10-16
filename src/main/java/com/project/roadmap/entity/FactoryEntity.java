@@ -26,7 +26,7 @@ public class FactoryEntity {
             //Requirement altındaki Task'ların durumlarını kontrol ediyoruz
             for (Task task : taskList) {
                 // Task OPENED durumundaysa geriye NOT_CLOSED_YET durumunda Requirement nesnesi dönüyoruz
-                if (task.getTaskState() == Constants.TaskState.OPENED)
+                if (task.getTaskState() != Constants.TaskState.CLOSED)
                     return new Requirement(requirementTitle, taskList, Constants.RequirementState.NOT_CLOSED_YET);
             }
             // Bütün tasklar CLOSED durumundaysa
