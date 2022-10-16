@@ -5,7 +5,6 @@ import com.project.roadmap.entity.Milestone;
 import com.project.roadmap.entity.Requirement;
 import com.project.roadmap.entity.Task;
 import com.project.roadmap.service.IGitLabApiService;
-import org.gitlab4j.api.Constants;
 import org.gitlab4j.api.GitLabApi;
 import org.gitlab4j.api.GitLabApiException;
 import org.gitlab4j.api.models.Issue;
@@ -13,13 +12,10 @@ import org.gitlab4j.api.models.IssueFilter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
-import com.project.roadmap.entity.Constants.TaskState;
-import com.project.roadmap.entity.Constants.RequirementState;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 public class GitLabApiService implements IGitLabApiService {
@@ -40,15 +36,14 @@ public class GitLabApiService implements IGitLabApiService {
 
         try {
             //Milestone title'larının diziye aktardık
-            List<String> milestones = gitLabApi.getMilestonesApi().getMilestones(projectId)
-                    .stream().map(m -> m.getTitle()).collect(Collectors.toList());
+            List<org.gitlab4j.api.models.Milestone> milestones = gitLabApi.getMilestonesApi().getMilestones(projectId);
+
 
             //Milestone title'larını ve bu Milestone'a ait Requirement Issue'larını çağırarak
             // bir Milestone nesnesi oluşturuldu. Oluşturulan bu Milestone'u Listemize ekledik
-            for (String milestone : milestones) {
-                milestoneList.add(new Milestone(milestone, getRequirementIssues(milestone)));
+            for (org.gitlab4j.api.models.Milestone milestone : milestones) {
+                milestoneList.add(FactoryEntity.getMilestoneInstance(milestone.getTitle(), getRequirementIssues(milestone.getTitle()), milestone.getState()));
             }
-
             return milestoneList;
         } catch (GitLabApiException e) {
             logger.warn("GitLabApiService.java -> getProjectRoadmapStatus() : " + e.getMessage());
