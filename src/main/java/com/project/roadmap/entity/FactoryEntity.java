@@ -6,11 +6,11 @@ import org.gitlab4j.api.Constants.IssueState;
 public class FactoryEntity {
 
     public static Milestone getMilestoneInstance(String milestoneTitle, List<Requirement> requirementList, String milestoneState) {
-        if (milestoneState.equals("closed")) {
+        if (milestoneState.equalsIgnoreCase("closed")) {
             //Milestone altındaki Requirement'ların durumlarını kontrol ediyoruz
             for (Requirement requirement : requirementList) {
                 // Requirement OPENED durumundaysa geriye NOT_CLOSED_YET durumunda Milestone nesnesi dönüyoruz
-                if (requirement.getRequirementState() == Constants.RequirementState.OPENED)
+                if (requirement.getRequirementState() != Constants.RequirementState.CLOSED)
                     return new Milestone(milestoneTitle, requirementList, Constants.MilestoneState.NOT_CLOSED_YET);
             }
             // Bütün Requirement'lar CLOSED durumundaysa
