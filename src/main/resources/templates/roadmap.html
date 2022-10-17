@@ -4,10 +4,33 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title th:text="${appName} + ' - Home'">Title</title>
+    <link rel="shortcut icon" type="image/png" th:href="@{favicon.ico}"/>
+
+    <!-- jQuery -->
+    <script src="/webjars/jquery/3.6.1/jquery.min.js"></script>
+
+    <!-- Moment JS -->
+    <script src="/webjars/momentjs/2.29.4/moment.js"></script>
+
+    <!-- Snap.svg -->
+    <script src="/library/snap.svg/0.5.1/snap.svg-min.js"></script>
+
+    <!-- Frappe Gantt Chart -->
+    <script src="/library/frappe-gantt/0.6.1/custom-frappe-gantt.js"></script>
+    <link rel="stylesheet" href="/library/frappe-gantt/0.6.1/frappe-gantt.css">
+    <!-- Custom Frappe Gantt Chart Theme CSS -->
+    <link rel="stylesheet" type="text/css" href="/css/custom-frappe-gantt-theme.css" />
+
+    <!-- Bootstrap -->
+    <link href="/webjars/bootstrap/5.2.2/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-Zenh87qX5JnK2Jl0vWa8Ck2rdkQ2Bzep5IDxbcnCeuOxjzrPF/et3URy9Bv1WTRi" crossorigin="anonymous">
+
+    <!-- Google Font: Inter -->
+    <link href="https://fonts.googleapis.com/css?family=Inter:400,300,700" rel="stylesheet" type="text/css">
+
+    <!-- Website CSS -->
+    <link rel="stylesheet" type="text/css" href="/css/custom-website-theme.css" />
 </head>
-<body>
-<h1>Hello !</h1>
-<p>Welcome to <span th:text="${appName}">App Name</span></p>
+<body class="bg-light">
 <div class="container">
 
     <div th:each="milestone : ${milestones}">
@@ -47,5 +70,154 @@
     </div>
 
 </div>
+<div class="container">
+    <main>
+        <h1>Hello !</h1>
+        <p class="mb-4 pb-4">Welcome to <span th:text="'\'' + ${appName} + '\''">App Name</span></p>
+        <div class="shadow card">
+            <nav id="roadmapViewBtnGroup" class="px-2 py-1 gap-2 navbar navbar-expand-lg">
+                <small class="fw-bold">View Type: </small>
+                <button id="ganttDayBtn" type="button" class="btn btn-light btn-sm border-secondary border-opacity-25">Day</button>
+                <button id="ganttWeekBtn" type="button" class="btn btn-light btn-sm border-secondary border-opacity-25">Week</button>
+                <button id="ganttMonthBtn" type="button" class="btn btn-light btn-sm border-secondary border-opacity-25">Month</button>
+            </nav>
+            <svg id="gantt"></svg>
+        </div>
+    </main>
+
+    <footer class="my-4 pt-4 text-muted text-center text-small">
+        <p class="mb-1"># 2022 Project Roadmap #</p>
+    </footer>
+</div>
+
+<script src="/webjars/bootstrap/5.2.2/js/bootstrap.bundle.min.js" integrity="sha384-OERcA2EqjJCMA+/3y+gxIOqMEjwtxJY7qPCqsdltbNJuaOe923+mo//f6V8Qbsw3" crossorigin="anonymous"></script>
+<script th:inline="javascript">
+    var milestones = /*[[${milestones}]]*/ null;
+
+    function createGanttTasks(milestoneList){
+        var taskCollection = [];
+        for (var mKey in milestoneList) {
+            var start = new Date(milestoneList[mKey].startDate);
+            var end = new Date(milestoneList[mKey].endDate);
+            var milestoneId = 'M' + milestoneList[mKey].id.toString();
+            taskCollection.push({
+                start: start,
+                end: end,
+                name: milestoneList[mKey].milestoneTitle,
+                id: milestoneId
+            });
+            const milestoneIndex = taskCollection.length - 1;
+
+            var requirements = milestoneList[mKey].requirementList;
+            for (var rKey in requirements) {
+                const requirementCompletionInfo = getRequirementCompletionInfo(requirements[rKey].taskList);
+                start = new Date(requirements[rKey].startDate);
+                end = new Date(requirements[rKey].endDate);
+                const requirementId = 'R' + requirements[rKey].id.toString();
+                taskCollection.push({
+                    start: start,
+                    end: end,
+                    name: requirements[rKey].requirementTitle,
+                    id: requirementId,
+                    progress: requirementCompletionInfo.progress,
+                    dependencies: milestoneId,
+                    taskCnt: requirementCompletionInfo.taskCnt,
+                    completedTaskCnt: requirementCompletionInfo.completedTaskCnt
+                });
+            }
+
+            const milestoneCompletionInfo = getMilestoneCompletionInfo(requirements);
+            taskCollection[milestoneIndex].progress = milestoneCompletionInfo.progress;
+            taskCollection[milestoneIndex].taskCnt = milestoneCompletionInfo.totalTaskCnt;
+            taskCollection[milestoneIndex].completedTaskCnt = milestoneCompletionInfo.totalCompletedTaskCnt;
+        }
+        return taskCollection;
+    }
+
+    function getRequirementCompletionInfo(tasks) {
+        var taskCnt = tasks.length;
+        var completedTaskCnt = 0;
+        for (var key in tasks) {
+            if (tasks[key].taskState === "CLOSED") {
+                completedTaskCnt++;
+            }
+        }
+        const progress = (completedTaskCnt / taskCnt) * 100;
+        return {progress, taskCnt, completedTaskCnt};
+    }
+
+    function getMilestoneCompletionInfo(requirements) {
+        const requirementCnt = requirements.length;
+        var completedRequirementCnt = 0;
+        var totalTaskCnt = 0;
+        var totalCompletedTaskCnt = 0;
+        for (var key in requirements) {
+            if (requirements[key].requirementState === "CLOSED") {
+                completedRequirementCnt++;
+            }
+            let taskCompletionInfo = getRequirementCompletionInfo(requirements[key].taskList);
+            totalTaskCnt += taskCompletionInfo.taskCnt;
+            totalCompletedTaskCnt += taskCompletionInfo.completedTaskCnt;
+        }
+        var progress = (totalCompletedTaskCnt / totalTaskCnt) * 100;
+        return {progress, requirementCnt, completedRequirementCnt, totalTaskCnt, totalCompletedTaskCnt};
+    }
+
+    var gantt = new Gantt("#gantt", [{
+        id: 'Task 1',
+        name: 'Redesign website',
+        start: '2016-12-28',
+        end: '2016-12-31',
+        progress: 20,
+        dependencies: 'Task 2, Task 3'}]);
+
+    $('#ganttDayBtn').on('click', function(event) {
+        $('#roadmapViewBtnGroup > button').removeClass('active');
+        $(this).addClass('active');
+        gantt.change_view_mode('Day') // Quarter Day, Half Day, Day, Week, Month
+    });
+
+    $('#ganttWeekBtn').on('click', function(event) {
+        $('#roadmapViewBtnGroup > button').removeClass('active');
+        $(this).addClass('active');
+        gantt.change_view_mode('Week') // Quarter Day, Half Day, Day, Week, Month
+    });
+
+    $('#ganttMonthBtn').on('click', function(event) {
+        $('#roadmapViewBtnGroup > button').removeClass('active');
+        $(this).addClass('active');
+        gantt.change_view_mode('Month') // Quarter Day, Half Day, Day, Week, Month
+    });
+
+    $(function () {
+        var ganttTasks = createGanttTasks(milestones);
+
+        gantt = new Gantt("#gantt", ganttTasks, {
+            header_height: 50,
+            column_width: 30,
+            step: 24,
+            view_modes: ['Quarter Day', 'Half Day', 'Day', 'Week', 'Month'],
+            bar_height: 20,
+            bar_corner_radius: 3,
+            arrow_curve: 5,
+            padding: 18,
+            view_mode: 'Day',
+            date_format: 'YYYY-MM-DD',
+            custom_popup_html: function(task) {
+                return `
+                        <div class="card">
+                            <div class="card-body">
+                                <h6>${task.name}</h6>
+                                <span>Task Completion: <span class="badge bg-secondary">${task.completedTaskCnt} / ${task.taskCnt}</span></span>
+                                <span>${task.progress}% completed!</span>
+                            </div>
+                        </div>
+                      `;
+            }
+        });
+
+        $('#ganttMonthBtn').click();
+    })
+</script>
 </body>
 </html>
