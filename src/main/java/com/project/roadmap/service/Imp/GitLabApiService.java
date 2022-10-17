@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 
 @Service
@@ -27,7 +28,7 @@ public class GitLabApiService implements IGitLabApiService {
     public GitLabApiService(GitLabApi gitLabApi) {
         this.gitLabApi = gitLabApi;
         //ProjectId ataması
-        this.projectId = String.valueOf(34L);
+        this.projectId = String.valueOf(1L);
     }
 
     @Override
@@ -42,8 +43,17 @@ public class GitLabApiService implements IGitLabApiService {
             //Milestone title'larını ve bu Milestone'a ait Requirement Issue'larını çağırarak
             // bir Milestone nesnesi oluşturuldu. Oluşturulan bu Milestone'u Listemize ekledik
             for (org.gitlab4j.api.models.Milestone milestone : milestones) {
-                milestoneList.add(FactoryEntity.getMilestoneInstance(milestone.getTitle(), getRequirementIssues(milestone.getTitle()), milestone.getState()));
+                Date startDate = milestone.getStartDate();
+                Date endDate = milestone.getDueDate();
+                // Requirement'ın başlangıç ve bitiş tarihi Milestone ile aynı çünkü issuelara start date girilemiyor.
+                // O nedenle bir requirement, Milestone başlangıcı ile başlamış olur ve milestone ile sonlanır şeklinde
+                // varsayımda bulunuldu ve Requirement'ın başlangıç&bitiş tarihi verildi.
+                Milestone milestoneEntity = FactoryEntity.getMilestoneInstance(milestone.getId(), milestone.getTitle(),
+                        getRequirementIssues(milestone.getTitle(), startDate, endDate), milestone.getState(),
+                        startDate, endDate);
+                milestoneList.add(milestoneEntity);
             }
+            Collections.sort(milestoneList);
             return milestoneList;
         } catch (GitLabApiException e) {
             logger.warn("GitLabApiService.java -> getProjectRoadmapStatus() : " + e.getMessage());
@@ -51,7 +61,7 @@ public class GitLabApiService implements IGitLabApiService {
         return Collections.emptyList();
     }
 
-    private List<Requirement> getRequirementIssues(String milestoneTitle) {
+    private List<Requirement> getRequirementIssues(String milestoneTitle, Date startDate, Date endDate) {
 
         List<Requirement> requirementList = new ArrayList<>();
 
@@ -64,11 +74,11 @@ public class GitLabApiService implements IGitLabApiService {
             // Requirement Issue listesi ile Requirement Title'ları ve Linklenmiş Issue'ları çağırarak
             // bir Requirement nesnesi oluşturuldu ve Requirement Listesine eklendi
             for (Issue requirement : requirementsIssueList) {
-
-                requirementList.add(FactoryEntity
-                        .getRequirementInstance(requirement.getTitle(), getTaskIssues(requirement.getIid()), requirement.getState()));
+                Requirement requirementEntity = FactoryEntity.getRequirementInstance(requirement.getId(), requirement.getTitle(),
+                        getTaskIssues(requirement.getIid()), requirement.getState(), startDate, endDate);
+                requirementList.add(requirementEntity);
             }
-
+            Collections.sort(requirementList);
             return requirementList;
         } catch (GitLabApiException e) {
             logger.warn("GitLabApiService.java -> getRequirementIssues() : " + e.getMessage());
