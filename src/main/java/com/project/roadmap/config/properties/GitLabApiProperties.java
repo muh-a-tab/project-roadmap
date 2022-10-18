@@ -7,10 +7,11 @@ import org.springframework.context.annotation.Configuration;
 @ConfigurationProperties(prefix = "gitlab.api")
 public class GitLabApiProperties {
 
-	
 	private String hostUrl;
 
 	private String privateToken;
+
+	private static Long projectId;
 
 	public String getHostUrl() {
 		return hostUrl;
@@ -27,5 +28,12 @@ public class GitLabApiProperties {
 	public void setPrivateToken(String privateToken) {
 		this.privateToken = privateToken;
 	}
-	
+
+	public static Long getProjectId() {
+		return projectId;
+	}
+
+	public void setProjectId(Long projectId) {
+		this.projectId = projectId;
+	}
 }

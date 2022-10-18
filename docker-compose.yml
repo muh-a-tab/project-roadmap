@@ -1,0 +1,11 @@
+version: "3.4"
+services:
+  roadmap-app:
+    container_name: dc-rodamap-app
+    build: .
+    ports:
+      - 8081:8081
+    environment:
+      -gitlab_api_hostUrl:
+      -gitlab_api_privateToken:
+      -gitlab_api_projectId:

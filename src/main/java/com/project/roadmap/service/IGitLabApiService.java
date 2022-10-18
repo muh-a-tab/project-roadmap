@@ -9,4 +9,8 @@ import java.util.List;
 public interface IGitLabApiService {
     List<Milestone> getProjectRoadmapStatus();
 
+    List<Requirement> getUnplacedRequirement();
+
+    List<Task> getUnplacedTask();
+
 }
