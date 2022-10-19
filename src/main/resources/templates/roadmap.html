@@ -25,152 +25,143 @@
     <link href="/webjars/bootstrap/5.2.2/css/bootstrap.min.css" rel="stylesheet"
           integrity="sha384-Zenh87qX5JnK2Jl0vWa8Ck2rdkQ2Bzep5IDxbcnCeuOxjzrPF/et3URy9Bv1WTRi" crossorigin="anonymous">
 
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="/webjars/font-awesome/6.2.0/css/all.min.css">
+
+    <!-- Bootstrap 5 BS5-Nav-Tree View -->
+    <script src="/library/bs5-nav-tree/0.3.1/tree.js"></script>
+    <link rel="stylesheet" href="/library/bs5-nav-tree/0.3.1/tree.css">
+
     <!-- Google Font: Inter -->
     <link href="https://fonts.googleapis.com/css?family=Inter:400,300,700" rel="stylesheet" type="text/css">
-    
+
     <!-- Website CSS -->
     <link rel="stylesheet" type="text/css" href="/css/custom-website-theme.css"/>
 </head>
 <body class="bg-light">
-<br>
-<br>
-
-<div class="row" style="padding: 20px">
-    <div class="col-lg-3">
-        <div class="accordion" id="accordionPanelsStayOpenExample">
-            <div class="accordion-item">
-                <div class="accordion-header" id="panelsStayOpen-headingOne">
-                    <button class="accordion-button" type="button" data-bs-toggle="collapse"
-                            data-bs-target="#panelsStayOpen-collapseOne" aria-expanded="true"
-                            aria-controls="panelsStayOpen-collapseOne">
-                        <h5 style="color:#111111">Milestones</h5>
-                    </button>
-                </div>
-                <div id="panelsStayOpen-collapseOne" class="accordion-collapse collapse show"
-                     aria-labelledby="panelsStayOpen-headingOne">
-                    <div class="accordion-body">
-                        <div class="list">
-                            <div th:each="milestone : ${milestones}">
-                                <div class="list-miles" th:switch="${milestone.getMilestoneState.name()}">
-                                    <li th:case="${'OPENED'}" th:text="${milestone.getMilestoneTitle()}"><span></span>
-                                    </li>
-                                    <li th:case="${'CLOSED'}">
-                                        <del th:text="${milestone.getMilestoneTitle()}"><span></span></del>
-                                    </li>
-                                    <li th:case="${'NOT_CLOSED_YET'}">
-                                        <del th:text="${milestone.getMilestoneTitle()}" style="color: red"><span></span>
-                                        </del>
-                                    </li>
-                                </div>
-                                <ul>
-                                    <div th:each="requirement : ${milestone.getRequirementList()}">
-                                        <div class="list-requ" th:switch="${requirement.getRequirementState.name()}">
-                                            <li th:case="${'OPENED'}" th:text="${requirement.getRequirementTitle()}">
-                                                <span></span>
-                                            </li>
-                                            <li th:case="${'CLOSED'}">
-                                                <del th:text="${requirement.getRequirementTitle()}"><span></span></del>
-                                            </li>
-                                            <li th:case="${'NOT_CLOSED_YET'}">
-                                                <del th:text="${requirement.getRequirementTitle()}" style="color: red">
-                                                    <span></span>
-                                                </del>
-                                            </li>
-                                        </div>
-                                        <ul>
-                                            <div th:each="task : ${requirement.getTaskList()}">
-                                                <div th:switch="${task.getTaskState().name()}">
-                                                    <li th:case="${'CLOSED'}">
-                                                        <del th:text="${task.getTaskTitle()}"><span></span></del>
+<main class="my-5">
+    <div class="container">
+        <div class="row">
+            <h1>Hello !</h1>
+            <p class="mb-4 pb-4">Welcome to <span th:text="'\'' + ${appName} + '\''">App Name</span></p>
+            <div class="col col-md-4 col-lg-3 mb-2 pb-2">
+                <div class="accordion" id="accordionPanelsStayOpenExample">
+                    <div class="accordion-item">
+                        <div class="accordion-header" id="panelsStayOpen-headingOne">
+                            <button class="accordion-button" type="button" data-bs-toggle="collapse"
+                                    data-bs-target="#panelsStayOpen-collapseOne" aria-expanded="true"
+                                    aria-controls="panelsStayOpen-collapseOne">
+                                <h5 style="color:#111111">Milestones</h5>
+                            </button>
+                        </div>
+                        <div id="panelsStayOpen-collapseOne" class="accordion-collapse collapse show"
+                             aria-labelledby="panelsStayOpen-headingOne">
+                            <div class="accordion-body">
+                                <ul id="nav-tree">
+                                    <th:block th:each="milestone,mIter : ${milestones}" th:with="randomMid=${#strings.randomAlphanumeric(5)}">
+                                        <li th:id="'li' + ${mIter.index} + ${randomMid}" th:data-value="'li' + ${mIter.index} + ${randomMid}">
+                                            <th:block th:switch="${milestone.getMilestoneState.name()}">
+                                                <a th:case="${'OPENED'}" th:text="${milestone.getMilestoneTitle()}"></a>
+                                                <a th:case="${'CLOSED'}"><del th:text="${milestone.getMilestoneTitle()}"></del></a>
+                                                <a th:case="${'NOT_CLOSED_YET'}"><del th:text="${milestone.getMilestoneTitle()}" style="color: red"></del></a>
+                                            </th:block>
+                                            <ul>
+                                                <th:block th:each="requirement,rIter : ${milestone.getRequirementList()}" th:with="randomRid=${#strings.randomAlphanumeric(5)}">
+                                                    <li th:id="'li' + ${rIter.index} + ${randomRid}" th:data-value="'li' + ${rIter.index} +  ${randomRid}">
+                                                        <th:block th:switch="${requirement.getRequirementState.name()}">
+                                                            <a th:case="${'OPENED'}" th:text="${requirement.getRequirementTitle()}"></a>
+                                                            <a th:case="${'CLOSED'}"><del th:text="${requirement.getRequirementTitle()}"></del></a>
+                                                            <a th:case="${'NOT_CLOSED_YET'}"><del th:text="${requirement.getRequirementTitle()}" style="color: red"></del></a>
+                                                        </th:block>
+                                                        <ul>
+                                                            <th:block th:each="task,tIter : ${requirement.getTaskList()}" th:with="randomTid=${#strings.randomAlphanumeric(5)}">
+                                                                <li th:id="'li' + ${tIter.index} + ${randomTid}" th:data-value="'li' + ${tIter.index} + ${randomTid}">
+                                                                    <th:block th:switch="${task.getTaskState().name()}">
+                                                                        <a th:case="${'CLOSED'}"><del th:text="${task.getTaskTitle()}"></del></a>
+                                                                        <a th:case="${'OPENED'}" th:text="${task.getTaskTitle()}"></a>
+                                                                    </th:block>
+                                                                </li>
+                                                            </th:block>
+                                                        </ul>
                                                     </li>
-                                                    <li th:case="${'OPENED'}" th:text="${task.getTaskTitle()}">
-                                                        <span></span></li>
-                                                </div>
-                                            </div>
+                                                </th:block>
+                                            </ul>
+                                        </li>
+                                    </th:block>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="panelsStayOpen-headingTwo">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                                    data-bs-target="#panelsStayOpen-collapseTwo" aria-expanded="false"
+                                    aria-controls="panelsStayOpen-collapseTwo">
+                                <h5 style="color:#111111">Hatalı Requirement Listesi</h5>
+                            </button>
+                        </h2>
+                        <div id="panelsStayOpen-collapseTwo" class="accordion-collapse collapse"
+                             aria-labelledby="panelsStayOpen-headingTwo">
+                            <div class="accordion-body">
+                                <div class="list">
+                                    <div th:each="req : ${incorrectRequirement}">
+                                        <ul>
+                                            <li th:text="${req.getRequirementTitle()}" style="color: red">
+                                            </li>
                                         </ul>
                                     </div>
-                                </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="panelsStayOpen-headingThree">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                                    data-bs-target="#panelsStayOpen-collapseThree" aria-expanded="false"
+                                    aria-controls="panelsStayOpen-collapseThree">
+                                <h5 style="color:#111111">Hatalı Task Listesi</h5>
+                            </button>
+                        </h2>
+                        <div id="panelsStayOpen-collapseThree" class="accordion-collapse collapse"
+                             aria-labelledby="panelsStayOpen-headingThree">
+                            <div class="accordion-body">
+                                <div class="list">
+                                    <div th:each="tas : ${incorrectTask}">
+                                        <ul>
+                                            <li th:text="${tas.getTaskTitle()}" style="color: red"></li>
+                                        </ul>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
-            <div class="accordion-item">
-                <h2 class="accordion-header" id="panelsStayOpen-headingTwo">
-                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
-                            data-bs-target="#panelsStayOpen-collapseTwo" aria-expanded="false"
-                            aria-controls="panelsStayOpen-collapseTwo">
-                        <h5 style="color:#111111">Hatalı Requirement Listesi</h5>
-                    </button>
-                </h2>
-                <div id="panelsStayOpen-collapseTwo" class="accordion-collapse collapse"
-                     aria-labelledby="panelsStayOpen-headingTwo">
-                    <div class="accordion-body">
-                        <div class="list">
-                            <div th:each="req : ${incorrectRequirement}">
-                                <ul>
-                                    <li th:text="${req.getRequirementTitle()}" style="color: red">
-                                    </li>
-                                </ul>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="accordion-item">
-                <h2 class="accordion-header" id="panelsStayOpen-headingThree">
-                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
-                            data-bs-target="#panelsStayOpen-collapseThree" aria-expanded="false"
-                            aria-controls="panelsStayOpen-collapseThree">
-                        <h5 style="color:#111111">Hatalı Task Listesi</h5>
-                    </button>
-                </h2>
-                <div id="panelsStayOpen-collapseThree" class="accordion-collapse collapse"
-                     aria-labelledby="panelsStayOpen-headingThree">
-                    <div class="accordion-body">
-                        <div class="list">
-                            <div th:each="tas : ${incorrectTask}">
-                                <ul>
-                                    <li th:text="${tas.getTaskTitle()}" style="color: red"></li>
-                                </ul>
-                            </div>
-                        </div>
-                    </div>
+            <div class="col col-md-8 col-lg-9">
+                <div class="shadow card">
+                    <nav id="roadmapViewBtnGroup" class="px-2 py-1 gap-2 navbar navbar-expand-lg">
+                        <small class="fw-bold">View Type: </small>
+                        <button id="ganttDayBtn" type="button"
+                                class="btn btn-light btn-sm border-secondary border-opacity-25">Day
+                        </button>
+                        <button id="ganttWeekBtn" type="button"
+                                class="btn btn-light btn-sm border-secondary border-opacity-25">Week
+                        </button>
+                        <button id="ganttMonthBtn" type="button"
+                                class="btn btn-light btn-sm border-secondary border-opacity-25">Month
+                        </button>
+                    </nav>
+                    <svg id="gantt"></svg>
                 </div>
             </div>
         </div>
     </div>
-    <div class="col-lg-9">
-        <main>
-            <h1>Hello !</h1>
-            <p class="mb-4 pb-4">Welcome to <span th:text="'\'' + ${appName} + '\''">App Name</span></p>
-            <div class="shadow card">
-                <nav id="roadmapViewBtnGroup" class="px-2 py-1 gap-2 navbar navbar-expand-lg">
-                    <small class="fw-bold">View Type: </small>
-                    <button id="ganttDayBtn" type="button"
-                            class="btn btn-light btn-sm border-secondary border-opacity-25">Day
-                    </button>
-                    <button id="ganttWeekBtn" type="button"
-                            class="btn btn-light btn-sm border-secondary border-opacity-25">Week
-                    </button>
-                    <button id="ganttMonthBtn" type="button"
-                            class="btn btn-light btn-sm border-secondary border-opacity-25">Month
-                    </button>
-                </nav>
-                <svg id="gantt"></svg>
-            </div>
-        </main>
-
-
-    </div>
-
-
-</div>
-
+</main>
 
 <footer class="my-4 pt-4 text-muted text-center text-small">
     <p class="mb-1"># 2022 Project Roadmap #</p>
 </footer>
+
 <script src="/webjars/bootstrap/5.2.2/js/bootstrap.bundle.min.js"
         integrity="sha384-OERcA2EqjJCMA+/3y+gxIOqMEjwtxJY7qPCqsdltbNJuaOe923+mo//f6V8Qbsw3"
         crossorigin="anonymous"></script>
@@ -252,7 +243,6 @@
         start: '2016-12-28',
         end: '2016-12-31',
         progress: 20,
-        dependencies: 'Task 2, Task 3'
     }]);
 
     $('#ganttDayBtn').on('click', function (event) {
@@ -273,7 +263,21 @@
         gantt.change_view_mode('Month') // Quarter Day, Half Day, Day, Week, Month
     });
 
-    $(function () {
+    document.addEventListener('DOMContentLoaded', function () {
+        NavTree.createBySelector("#nav-tree", {
+            showEmptyGroups: true,
+            iconWidth: "25px",
+            groupOpenIconClass: "fas",
+            groupOpenIcon: "fa-chevron-down",
+            groupCloseIconClass: "fas",
+            groupCloseIcon: "fa-chevron-right",
+            linkIconClass: "fa-solid",
+            linkIcon: "fa-bars-progress",
+            iconPlace: "start"
+        });
+    });
+
+    $( document ).ready(function() {
         var ganttTasks = createGanttTasks(milestones);
 
         gantt = new Gantt("#gantt", ganttTasks, {
