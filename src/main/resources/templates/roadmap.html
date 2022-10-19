@@ -216,7 +216,7 @@
                 completedTaskCnt++;
             }
         }
-        const progress = (completedTaskCnt / taskCnt) * 100;
+        const progress = ((completedTaskCnt / taskCnt) * 100).toFixed(0);
         return {progress, taskCnt, completedTaskCnt};
     }
 
@@ -233,7 +233,7 @@
             totalTaskCnt += taskCompletionInfo.taskCnt;
             totalCompletedTaskCnt += taskCompletionInfo.completedTaskCnt;
         }
-        var progress = (totalCompletedTaskCnt / totalTaskCnt) * 100;
+        var progress = ((totalCompletedTaskCnt / totalTaskCnt) * 100).toFixed(0);
         return {progress, requirementCnt, completedRequirementCnt, totalTaskCnt, totalCompletedTaskCnt};
     }
 
