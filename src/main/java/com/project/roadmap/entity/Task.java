@@ -1,23 +1,22 @@
 package com.project.roadmap.entity;
 
 import com.project.roadmap.entity.Constants.TaskState;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
 
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+@ToString
 public class Task {
 
-    private final String taskTitle;
-
+    private String taskTitle;
     private TaskState taskState;
 
-    public Task(String taskTitle, TaskState taskState) {
-        this.taskTitle = taskTitle;
-        this.taskState = taskState;
-    }
-
-    public String getTaskTitle() {
-        return taskTitle;
-    }
-
-    public TaskState getTaskState() {
-        return taskState;
-    }
 }
