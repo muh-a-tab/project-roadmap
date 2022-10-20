@@ -6,7 +6,8 @@ import com.project.roadmap.entity.Task;
 
 import java.util.List;
 
-public interface IGitLabApiService {
+public interface GitLabApiService {
+
     List<Milestone> getProjectRoadmapStatus();
 
     List<Requirement> getUnplacedRequirement();

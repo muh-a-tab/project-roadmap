@@ -2,46 +2,28 @@ package com.project.roadmap.entity;
 
 import java.util.Date;
 import java.util.List;
+
 import com.project.roadmap.entity.Constants.MilestoneState;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
 
-public class Milestone implements Comparable<Milestone> {
-    private final Long id;
-    private final String milestoneTitle;
-    private final MilestoneState milestoneState;
-    private final List<Requirement> requirementList;
-    private final Date startDate;
-    private final Date endDate;
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+@ToString
+public class Milestone {
 
-    public Milestone(Long id, String milestoneTitle, List<Requirement> requirementList, MilestoneState milestoneState,
-                     Date startDate, Date endDate) {
-        this.id = id;
-        this.milestoneTitle = milestoneTitle;
-        this.requirementList = requirementList;
-        this.milestoneState = milestoneState;
-        this.startDate = startDate;
-        this.endDate = endDate;
-    }
+    private Long id;
+    private String milestoneTitle;
+    private MilestoneState milestoneState;
+    private List<Requirement> requirementList;
+    private Date startDate;
+    private Date endDate;
 
-    public Long getId() { return id; }
-
-    public String getMilestoneTitle() {
-        return milestoneTitle;
-    }
-
-    public List<Requirement> getRequirementList() {
-        return requirementList;
-    }
-
-    public MilestoneState getMilestoneState() {
-        return milestoneState;
-    }
-
-    public Date getStartDate() { return startDate; }
-
-    public Date getEndDate() {return endDate; }
-
-    @Override
-    public int compareTo(Milestone o) {
-        return getStartDate().compareTo(o.getStartDate());
-    }
 }
