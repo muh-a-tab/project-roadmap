@@ -81,11 +81,11 @@ public class FactoryEntity {
     }
 
 
-    public static Task getTaskInstance(String taskTitle, IssueState taskState) {
+    public static Task getTaskInstance(String taskTitle, IssueState taskState,String url) {
         if (taskState == IssueState.CLOSED) {
-            return new Task(taskTitle, Constants.TaskState.CLOSED);
+            return new Task(taskTitle, Constants.TaskState.CLOSED, url);
         } else {
-            return new Task(taskTitle, Constants.TaskState.OPENED);
+            return new Task(taskTitle, Constants.TaskState.OPENED, url);
         }
     }
 }

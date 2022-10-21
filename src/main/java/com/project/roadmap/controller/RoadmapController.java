@@ -20,8 +20,9 @@ public class RoadmapController {
     @GetMapping("/")
     public String homePage(Model model) {
         model.addAttribute("milestones", gitLabApiService.getProjectRoadmapStatus());
-        model.addAttribute("incorrectRequirement", gitLabApiService.getUnplacedRequirement());
-        model.addAttribute("incorrectTask", gitLabApiService.getUnplacedTask());
+        model.addAttribute("unplacedMilestones", gitLabApiService.getUnplacedMilestones());
+        model.addAttribute("unplacedRequirements", gitLabApiService.getUnplacedRequirements());
+        model.addAttribute("unplacedTasks", gitLabApiService.getUnplacedTasks());
         model.addAttribute("appName", appName);
         return "roadmap";
     }
