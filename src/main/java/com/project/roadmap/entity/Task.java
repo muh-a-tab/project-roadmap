@@ -18,5 +18,6 @@ public class Task {
 
     private String taskTitle;
     private TaskState taskState;
+    private String url;
 
 }

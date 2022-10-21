@@ -31,10 +31,11 @@ public class GitLabApiServiceImp implements GitLabApiService {
     private final GitLabApi gitLabApi;
     private final String projectId = String.valueOf(GitLabApiProperties.getProjectId());
     private Logger logger = LoggerFactory.getLogger(GitLabApiService.class);
-
+    private List<Milestone> unplacedMilestones = new ArrayList<>();
     @Override
     public List<Milestone> getProjectRoadmapStatus() {
         List<Milestone> milestoneList = new ArrayList<>();
+        unplacedMilestones.clear();
         checkIssue();
 
         try {
@@ -46,6 +47,7 @@ public class GitLabApiServiceImp implements GitLabApiService {
             for (org.gitlab4j.api.models.Milestone milestone : milestones) {
                 Date startDate = milestone.getStartDate();
                 Date endDate = milestone.getDueDate();
+
                 // Requirement'ın başlangıç ve bitiş tarihi Milestone ile aynı çünkü issuelara start date girilemiyor.
                 // O nedenle bir requirement, Milestone başlangıcı ile başlamış olur ve milestone ile sonlanır şeklinde
                 // varsayımda bulunuldu ve Requirement'ın başlangıç&bitiş tarihi verildi.
@@ -56,7 +58,13 @@ public class GitLabApiServiceImp implements GitLabApiService {
                         milestone.getState(),
                         startDate,
                         endDate);
-                milestoneList.add(milestoneEntity);
+
+                if (startDate == null || endDate == null) {
+                    // startDate veya endDate'i null olan milestonlerı unplacedMilestones adındaki diziye ekliyoruz
+                    unplacedMilestones.add(milestoneEntity);
+                } else {
+                    milestoneList.add(milestoneEntity);
+                }
             }
             return milestoneList.stream()
                     .sorted(Comparator.comparingLong(milestone -> milestone.getStartDate().getTime()))
@@ -68,50 +76,46 @@ public class GitLabApiServiceImp implements GitLabApiService {
     }
 
 
-    List<Requirement> unplacedRequirement = new ArrayList<>();
-    List<Task> unplacedTask = new ArrayList<>();
+    private List<Requirement> unplacedRequirements = new ArrayList<>();
+    private List<Task> unplacedTasks = new ArrayList<>();
 
     public void checkIssue() {
-        List<Requirement> _unplacedRequirement = new ArrayList<>();
-        List<Task> _unplacedTask = new ArrayList<>();
-        List<Long> _placedTask = new ArrayList<>();
+        unplacedRequirements.clear();
+        unplacedTasks.clear();
+        List<Long> _placedTasks = new ArrayList<>();
         try {
             List<Issue> issues = gitLabApi.getIssuesApi().getIssues(projectId);
 
             for (Issue issue : issues) {
 
                 if (issue.getLabels().contains("requirement") && issue.getMilestone() == null) {
-                    _unplacedRequirement.add(FactoryEntity.getRequirementInstance(issue.getId(), issue.getTitle(),
+                    unplacedRequirements.add(FactoryEntity.getRequirementInstance(issue.getId(), issue.getTitle(),
                             null, issue.getState(), issue.getCreatedAt(), issue.getClosedAt()));
                 } else if (issue.getLabels().contains("requirement")) {
-                    _placedTask.addAll(gitLabApi.getIssuesApi().getIssueLinks(projectId, issue.getIid()).stream().map(i -> i.getIid()).collect(Collectors.toList()));
+                    _placedTasks.addAll(gitLabApi.getIssuesApi().getIssueLinks(projectId, issue.getIid()).stream().map(i -> i.getIid()).collect(Collectors.toList()));
                 }
 
             }
             for (Issue issue : issues) {
-                if (!_placedTask.contains(issue.getIid()) && !issue.getLabels().contains("requirement")) {
-                    _unplacedTask.add(FactoryEntity.getTaskInstance(issue.getTitle(), issue.getState()));
+                if (!_placedTasks.contains(issue.getIid()) && !issue.getLabels().contains("requirement")) {
+                    unplacedTasks.add(FactoryEntity.getTaskInstance(issue.getTitle(), issue.getState(), issue.getWebUrl()));
                 }
             }
-
-
-            unplacedRequirement = _unplacedRequirement;
-            unplacedTask = _unplacedTask;
-
         } catch (GitLabApiException e) {
-
+            logger.warn("GitLabApiService.java -> checkIssue() : " + e.getMessage());
         }
 
     }
 
-    @Override
-    public List<Requirement> getUnplacedRequirement() {
-        return unplacedRequirement;
+    public List<Requirement> getUnplacedRequirements() {
+        return unplacedRequirements;
     }
-
+    public List<Task> getUnplacedTasks() {
+        return unplacedTasks;
+    }
     @Override
-    public List<Task> getUnplacedTask() {
-        return unplacedTask;
+    public List<Milestone> getUnplacedMilestones() {
+        return unplacedMilestones;
     }
 
     private List<Requirement> getRequirementIssues(String milestoneTitle, Date startDate, Date endDate) {
@@ -151,9 +155,8 @@ public class GitLabApiServiceImp implements GitLabApiService {
             // Task dizisi kullanılarak Task nesneleri oluşturuldu ve listemize ekledik
             for (Issue task : tasks) {
                 // Task'ın milestone'u kontrol ediliyor
-                taskList.add(FactoryEntity.getTaskInstance(task.getTitle(), task.getState()));
+                taskList.add(FactoryEntity.getTaskInstance(task.getTitle(), task.getState(), task.getWebUrl()));
             }
-
             return taskList;
         } catch (GitLabApiException e) {
             logger.warn("GitLabApiService.java -> getTaskIssues() : " + e.getMessage());

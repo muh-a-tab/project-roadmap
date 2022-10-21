@@ -10,8 +10,10 @@ public interface GitLabApiService {
 
     List<Milestone> getProjectRoadmapStatus();
 
-    List<Requirement> getUnplacedRequirement();
+    List<Requirement> getUnplacedRequirements();
 
-    List<Task> getUnplacedTask();
+    List<Task> getUnplacedTasks();
+
+    List<Milestone> getUnplacedMilestones();
 
 }
